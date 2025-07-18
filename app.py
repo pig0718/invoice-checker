@@ -1,5 +1,5 @@
 import streamlit as st
-import pytesseract
+import easyocr
 from PIL import Image
 import re
 
@@ -11,7 +11,7 @@ EXPECTED_TITLES = [
 EXPECTED_TAX_ID = "55854972"
 
 st.set_page_config(page_title="發票檢查工具", layout="centered")
-st.title("📄 發票檢查工具（私密版）")
+st.title("📄 發票檢查工具（easyocr 版）")
 st.markdown("上傳發票圖片，系統將自動檢查抬頭、統編、金額大小寫與稅額是否一致。")
 
 uploaded_file = st.file_uploader("請上傳發票圖片（JPG / PNG）", type=["jpg", "jpeg", "png"])
@@ -21,7 +21,9 @@ if uploaded_file:
     st.image(image, caption="上傳的發票", use_container_width=True)
 
     with st.spinner("正在擷取文字..."):
-        text = pytesseract.image_to_string(image, lang="chi_tra+eng")
+        reader = easyocr.Reader(['ch_tra', 'en'])
+        results = reader.readtext(image)
+        text = "\n".join([res[1] for res in results])
 
     st.subheader("📋 擷取文字內容")
     st.text(text)
